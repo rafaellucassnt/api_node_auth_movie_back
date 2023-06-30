@@ -13,7 +13,6 @@ exports.up = function (knex) {
         table.integer('year').notNullable();
         table.text('synopsis', 3000).notNullable();
         table.text('img').notNullable();
-        table.float('nota').notNullable();
     });
 };
 
