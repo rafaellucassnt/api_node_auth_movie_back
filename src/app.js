@@ -5,6 +5,8 @@ const usersRouter = require('./routes/users');
 
 const port = 3000
 
+app.use(express.json());
+
 app.get('/', (req, res) => {
   res.send('Exercício 3 - API completa com Front End básico <br>Brenna Lopes Farace <br>Danilo Augusto Pereira <br>Rafael da Mota Corrêa <br>Rafael da Silveira <br>Rafael Lucas dos Santos')
 })
