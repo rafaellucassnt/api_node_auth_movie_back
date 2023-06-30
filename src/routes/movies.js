@@ -36,9 +36,24 @@ router.get('/:id', (req, res) => {
 
 // Adicionar um novo filme
 router.post('/', (req, res) => {
+
+    console.log(req.body.debut);
     const filme = req.body;
 
-    db.insert(filme)
+    db.insert({
+        title: req.body.title,
+        debut: req.body.debut,
+        genre: JSON.stringify(req.body.genre),
+        duration: req.body.duration,
+        origin: req.body.origin,
+        direction: req.body.direction,
+        script: req.body.script,
+        distributor: req.body.distributor,
+        classification: req.body.classification,
+        year: req.body.year,
+        synopsis: req.body.synopsis,
+        img: req.body.img
+    })
         .into('filmes')
         .then(() => {
             res.status(201).json({ message: 'Filme adicionado com sucesso.' });
@@ -56,7 +71,20 @@ router.put('/:id', (req, res) => {
 
     db('filmes')
         .where({ id: id })
-        .update(filme)
+        .update({
+            title: req.body.title,
+            debut: req.body.debut,
+            genre: JSON.stringify(req.body.genre),
+            duration: req.body.duration,
+            origin: req.body.origin,
+            direction: req.body.direction,
+            script: req.body.script,
+            distributor: req.body.distributor,
+            classification: req.body.classification,
+            year: req.body.year,
+            synopsis: req.body.synopsis,
+            img: req.body.img
+        })
         .then((updated) => {
             if (updated) {
                 res.json({ message: 'Filme atualizado com sucesso.' });
