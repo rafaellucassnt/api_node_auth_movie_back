@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/app.js",
-    "dev": "nodemon src/app.js"
+    "dev": "nodemon src/app.js",
+    "build": "npm install && npm run dist && node build.js",
+    "start-dist": "nodemon dist/app.js"
   },
   "repository": {
     "type": "git",
@@ -34,6 +36,9 @@
     "sqlite3": "^5.1.6"
   },
   "devDependencies": {
+    "@babel/cli": "^7.21.5",
+    "@babel/core": "^7.22.1",
+    "@babel/preset-env": "^7.22.4",
     "nodemon": "^2.0.22"
   }
 }
