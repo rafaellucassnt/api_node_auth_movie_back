@@ -4,21 +4,73 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
 
-// Função para gerar o token JWT
-function generateToken(user) {
-  const payload = {
-    id: user.id,
-    username: user.username,
-    roles: user.roles
-  };
 
-  const options = {
-    expiresIn: '1h' // Token expira em 1 hora
-  };
 
-  return jwt.sign(payload, 'secret', options);
+router.checkToken = (req, res, next) => {
+  let authInfo = req.get('authorization')
+  console.log(authInfo);
+  if (authInfo) {
+      const [bearer, token] = authInfo.split(' ')
+      
+      if (!/Bearer/.test(bearer)) {
+      res.status(400).json({ message: 'Tipo de token esperado não informado...', error: true })
+      return 
+      }
+
+      jwt.verify(token, process.env.SECRET_KEY, (err, decodeToken) => {
+          if (err) {
+              res.status(401).json({ message: 'Acesso negado'})
+              return
+          }
+          req.usuarioId = decodeToken.id
+          req.roles = decodeToken.roles
+          next()
+      })
+  } 
+  else
+      res.status(401).json({ message: 'Acesso negado'})
 }
 
+router.isAdmin = (req, res, next) => {
+  if (req.roles?.split(';').includes('ADMIN')){
+      next()
+  }
+  else {
+      res.status(403).json({ message: 'Acesso negado'})
+  }
+}
+
+router.post('/login', function (req, res) {
+  db.select('*').from('usuarios').where( { username: req.body.username })
+  .then( usuarios => {
+      if(usuarios.length){
+          let usuario = usuarios[0]
+          let checkSenha = bcrypt.compareSync (req.body.password, usuario.password)
+          if (checkSenha) {
+             var tokenJWT = jwt.sign({ id: usuario.id, roles: usuario.roles }, 
+                  process.env.SECRET_KEY, {
+                    expiresIn: 3600
+                  })
+
+              res.status(200).json ({
+                  id: usuario.id,
+                  username: usuario.username, 
+                  nome: usuario.nome, 
+                  roles: usuario.roles,
+                  token: tokenJWT
+              })  
+              return 
+          }
+      } 
+        
+      res.status(401).json({ message: 'Login ou password incorretos' })
+  })
+  .catch (err => {
+      res.status(500).json({ 
+         message: 'Erro ao verificar login - ' + err.message })
+  })
+
+})
 // Rota para criar um novo usuário
 router.post('/', (req, res) => {
   const { name, username, email, password, roles } = req.body;
@@ -33,7 +85,7 @@ router.post('/', (req, res) => {
         return res.status(409).json({ error: 'Usuário já existe.' });
       }
 
-      // Criptografar a senha
+      // Criptografar a password
       bcrypt.hash(password, 10, (err, hash) => {
         if (err) {
           return res.status(500).json({ error: 'Ocorreu um erro durante o registro.' });
@@ -92,7 +144,7 @@ router.put('/:id', (req, res) => {
   const id = req.params.id;
   const { name, username, email, password, roles } = req.body;
 
-  // Criptografar a senha
+  // Criptografar a password
   bcrypt.hash(password, 10, (err, hash) => {
     if (err) {
       return res.status(500).json({ error: 'Ocorreu um erro durante a atualização do usuário.' });
