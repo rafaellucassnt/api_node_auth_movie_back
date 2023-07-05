@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const { checkToken, isAdmin } = require('./users')
 
 // Listar todos os filmes
-router.get('/', (req, res) => {
+router.get('/', checkToken, (req, res) => {
     db.select('*')
         .from('filmes')
         .then((filmes) => {
@@ -35,25 +36,12 @@ router.get('/:id', (req, res) => {
 });
 
 // Adicionar um novo filme
-router.post('/', (req, res) => {
+router.post('/', checkToken, isAdmin, (req, res) => {
 
     console.log(req.body.debut);
     const filme = req.body;
 
-    db.insert({
-        title: req.body.title,
-        debut: req.body.debut,
-        genre: JSON.stringify(req.body.genre),
-        duration: req.body.duration,
-        origin: req.body.origin,
-        direction: req.body.direction,
-        script: req.body.script,
-        distributor: req.body.distributor,
-        classification: req.body.classification,
-        year: req.body.year,
-        synopsis: req.body.synopsis,
-        img: req.body.img
-    })
+    db.insert(filme)
         .into('filmes')
         .then(() => {
             res.status(201).json({ message: 'Filme adicionado com sucesso.' });
@@ -71,20 +59,7 @@ router.put('/:id', (req, res) => {
 
     db('filmes')
         .where({ id: id })
-        .update({
-            title: req.body.title,
-            debut: req.body.debut,
-            genre: JSON.stringify(req.body.genre),
-            duration: req.body.duration,
-            origin: req.body.origin,
-            direction: req.body.direction,
-            script: req.body.script,
-            distributor: req.body.distributor,
-            classification: req.body.classification,
-            year: req.body.year,
-            synopsis: req.body.synopsis,
-            img: req.body.img
-        })
+        .update(filme)
         .then((updated) => {
             if (updated) {
                 res.json({ message: 'Filme atualizado com sucesso.' });
