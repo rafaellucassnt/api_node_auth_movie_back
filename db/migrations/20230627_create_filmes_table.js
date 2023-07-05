@@ -1,9 +1,9 @@
 exports.up = function (knex) {
     return knex.schema.createTable('filmes', function (table) {
         table.increments('id').primary();
-        table.text('title', 200).notNullable();;
-        table.text('debut', 10).notNullable();;
-        table.json('genre', 100).notNullable();
+        table.text('title', 200).notNullable();
+        table.text('debut', 10).notNullable();
+        table.text('genre', 200).notNullable();
         table.integer('duration').notNullable();
         table.text('origin', 200).notNullable();
         table.text('direction', 100).notNullable();
